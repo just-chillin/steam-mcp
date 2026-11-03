@@ -31,11 +31,13 @@ Responses are trimmed for LLM consumption (an owned-games call on a 3000-game li
 
 ## Deploy
 
+Tooling is managed with [mise](https://mise.jdx.dev) (`mise install` gets pnpm).
+
 ```bash
-npm install
-npx wrangler login
-npx wrangler secret put STEAM_API_KEY      # from https://steamcommunity.com/dev/apikey
-npx wrangler deploy
+pnpm install
+pnpm wrangler login
+pnpm wrangler secret put STEAM_API_KEY      # from https://steamcommunity.com/dev/apikey
+pnpm wrangler deploy
 ```
 
 Or push to `main` with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` set as repo secrets — `.github/workflows/deploy.yml` tests and deploys.
@@ -46,15 +48,15 @@ The Worker does **no** OAuth itself; put it behind a gateway (Cloudflare's MCP g
 
 Two ways to stop people bypassing the gateway via the public `*.workers.dev` URL:
 
-1. **Shared header.** `npx wrangler secret put GATEWAY_SECRET` and have the gateway add `x-gateway-secret: <value>` to upstream requests. Without a match the Worker answers 401. Unset → open.
+1. **Shared header.** `pnpm wrangler secret put GATEWAY_SECRET` and have the gateway add `x-gateway-secret: <value>` to upstream requests. Without a match the Worker answers 401. Unset → open.
 2. **No public hostname.** Set `"workers_dev": false` in `wrangler.jsonc` and expose the Worker only on a route the gateway controls.
 
 ## Local dev
 
 ```bash
 cp .dev.vars.example .dev.vars   # add your key
-npm run dev                      # http://localhost:8787/mcp
-npm test
+pnpm dev                          # http://localhost:8787/mcp
+pnpm test
 ```
 
 Quick check:

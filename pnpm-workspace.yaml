@@ -1,0 +1,16 @@
+allowBuilds:
+  core-js-pure: false
+  esbuild: true
+  workerd: true
+minimumReleaseAgeExclude:
+  - '@vitest/mocker@5.1.0'
+  - agents@0.33.0
+  - vitest@5.1.0
+  - '@cloudflare/workerd-darwin-64@1.20261103.1'
+  - '@cloudflare/workerd-darwin-arm64@1.20261103.1'
+  - '@cloudflare/workerd-linux-64@1.20261103.1'
+  - '@cloudflare/workerd-linux-arm64@1.20261103.1'
+  - '@cloudflare/workerd-windows-64@1.20261103.1'
+  - miniflare@5.20261103.0-beta
+  - workerd@1.20261103.1
+  - wrangler@4.157.0

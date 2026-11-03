@@ -9,6 +9,6 @@
   "workers_dev": true,
   "observability": { "enabled": true }
   // Secrets (not in this file):
-  //   npx wrangler secret put STEAM_API_KEY
-  //   npx wrangler secret put GATEWAY_SECRET   (optional)
+  //   pnpm wrangler secret put STEAM_API_KEY
+  //   pnpm wrangler secret put GATEWAY_SECRET   (optional)
 }
