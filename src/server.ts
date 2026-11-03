@@ -110,7 +110,7 @@ export function buildServer(env: Env): McpServer {
       inputSchema: z.object({
         player,
         sort: z.enum(["playtime", "recent", "backlog", "name"]).default("playtime"),
-        limit: z.number().int().min(1).max(500).default(50),
+        limit: z.number().int().min(1).max(5000).default(50).describe("Max games to return (default 50). Raise it to pull more in one call; use offset to page."),
         offset: z.number().int().min(0).default(0).describe("Skip this many games (in `sort` order) — use next_offset from the previous page"),
         include_free_games: z.boolean().default(false).describe("Include free-to-play games the player has launched"),
       }),
