@@ -106,22 +106,23 @@ export function buildServer(env: Env): McpServer {
     "get_owned_games",
     {
       description:
-        "A player's game library with playtime. Trimmed: returns totals plus up to `limit` games ordered by `sort`. Requires public game details.",
+        "A player's game library with playtime. Trimmed: returns totals plus up to `limit` games ordered by `sort`, starting at `offset`. If `next_offset` is present in the result, call again with that offset to get the next page. Requires public game details.",
       inputSchema: z.object({
         player,
         sort: z.enum(["playtime", "recent", "backlog", "name"]).default("playtime"),
         limit: z.number().int().min(1).max(500).default(50),
+        offset: z.number().int().min(0).default(0).describe("Skip this many games (in `sort` order) — use next_offset from the previous page"),
         include_free_games: z.boolean().default(false).describe("Include free-to-play games the player has launched"),
       }),
       annotations: readOnly,
     },
-    safe(async ({ player, sort, limit, include_free_games }) => {
+    safe(async ({ player, sort, limit, offset, include_free_games }) => {
       const data = await steamGet(key, "IPlayerService", "GetOwnedGames", 1, {
         steamid: await id(player),
         include_appinfo: true,
         include_played_free_games: include_free_games,
       });
-      return shapeOwnedGames(data, sort, limit);
+      return shapeOwnedGames(data, sort, limit, offset);
     }),
   );
 

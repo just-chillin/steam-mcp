@@ -25,13 +25,14 @@ export function rankOwnedGames(games: OwnedGame[], sort: OwnedGamesSort, limit: 
   return games.slice(0, limit);
 }
 
-export function shapeOwnedGames(raw: any, sort: OwnedGamesSort, limit: number) {
+export function shapeOwnedGames(raw: any, sort: OwnedGamesSort, limit: number, offset = 0) {
   const r = raw?.response ?? {};
   const games: OwnedGame[] = r.games ?? [];
   if (!r.game_count && games.length === 0) {
     return { private_or_empty: true, note: "No games returned. The profile's game details are probably private." };
   }
-  const picked = rankOwnedGames(games, sort, limit).map((g) => ({
+  const ranked = rankOwnedGames(games, sort, offset + limit);
+  const picked = ranked.slice(offset).map((g) => ({
     appid: g.appid,
     name: g.name,
     hours: +(g.playtime_forever / 60).toFixed(1),
@@ -44,6 +45,8 @@ export function shapeOwnedGames(raw: any, sort: OwnedGamesSort, limit: number) {
     never_played: games.filter((g) => g.playtime_forever === 0).length,
     total_hours: Math.round(totalMinutes / 60),
     showing: picked.length,
+    offset,
+    next_offset: offset + picked.length < games.length ? offset + picked.length : undefined,
     sort,
     games: picked,
   };

@@ -81,6 +81,18 @@ describe("shape", () => {
     expect(out).toMatchObject({ game_count: 3, never_played: 1, total_hours: 11, showing: 2 });
   });
 
+  it("paginates owned games with offset / next_offset", () => {
+    const games = Array.from({ length: 5 }, (_, i) => ({ appid: i + 1, name: `G${i}`, playtime_forever: i, rtime_last_played: 0 }));
+    const raw = { response: { game_count: 5, games } };
+    const p1 = shapeOwnedGames(raw, "playtime", 2, 0) as any;
+    const p2 = shapeOwnedGames(raw, "playtime", 2, p1.next_offset) as any;
+    const p3 = shapeOwnedGames(raw, "playtime", 2, p2.next_offset) as any;
+    expect([p1.showing, p2.showing, p3.showing]).toEqual([2, 2, 1]);
+    expect(p3.next_offset).toBeUndefined();
+    const ids = [...p1.games, ...p2.games, ...p3.games].map((g: any) => g.appid);
+    expect(new Set(ids).size).toBe(5);
+  });
+
   it("handles achievement failures and locked filter", () => {
     expect(shapeAchievements({ playerstats: { success: false, error: "Profile is not public" } }, false)).toEqual({ error: "Profile is not public" });
     const out = shapeAchievements(

@@ -27,7 +27,7 @@ Stateless Streamable HTTP, no Durable Objects, no database. One Worker, one secr
 
 Every `player` argument accepts a SteamID64, a `steamcommunity.com/profiles/...` or `/id/...` URL, or a bare custom-URL name.
 
-Responses are trimmed for LLM consumption (an owned-games call on a 3000-game library won't blow up the context). Use `call_steam_api` when you need the raw thing.
+Responses are trimmed for LLM consumption (an owned-games call on a 3000-game library won't blow up the context). Page through big lists with `offset` (`get_owned_games` returns `next_offset` while more remain), or use `call_steam_api` when you need the raw thing.
 
 ## Deploy
 
