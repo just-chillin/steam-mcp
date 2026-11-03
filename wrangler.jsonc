@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "steam-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  // Set to false once your gateway reaches the Worker via a custom domain/route,
+  // so the public *.workers.dev URL can't be used to bypass it.
+  "workers_dev": true,
+  "observability": { "enabled": true }
+  // Secrets (not in this file):
+  //   npx wrangler secret put STEAM_API_KEY
+  //   npx wrangler secret put GATEWAY_SECRET   (optional)
+}
