@@ -10,19 +10,27 @@ export interface OwnedGame {
 
 export type OwnedGamesSort = "playtime" | "recent" | "backlog" | "name";
 
+/** Games under this many minutes count as backlog: launched once to check it works, never really played. */
+export const BACKLOG_MAX_MINUTES = 60;
+
 /**
- * Pick and order which owned games to show.
- *
- * TODO(you): this is a taste call — what should each sort mode mean?
- *  - "playtime": most-played first?
- *  - "recent":   last played first? (rtime_last_played; 0 means never)
- *  - "backlog":  never/barely played — where's the cutoff? 0 min? < 60 min?
- *  - "name":     alphabetical (name can be missing if include_appinfo=false)
- * Return at most `limit` games. Don't mutate `games`.
+ * Pick and order which owned games to show. Returns at most `limit` games; never mutates `games`.
+ *  - playtime: most-played first
+ *  - recent:   most recently played first; never-played last
+ *  - backlog:  only games under BACKLOG_MAX_MINUTES; never-launched first, then newer appids first
+ *  - name:     alphabetical (falls back to appid when Steam omits the name)
+ * Ties break on appid ascending so output is stable.
  */
 export function rankOwnedGames(games: OwnedGame[], sort: OwnedGamesSort, limit: number): OwnedGame[] {
-  // Placeholder so the server works before you fill this in.
-  return games.slice(0, limit);
+  const label = (g: OwnedGame) => g.name ?? String(g.appid);
+  const compare: Record<OwnedGamesSort, (a: OwnedGame, b: OwnedGame) => number> = {
+    playtime: (a, b) => b.playtime_forever - a.playtime_forever,
+    recent: (a, b) => (b.rtime_last_played ?? 0) - (a.rtime_last_played ?? 0),
+    backlog: (a, b) => Number(a.playtime_forever > 0) - Number(b.playtime_forever > 0) || b.appid - a.appid,
+    name: (a, b) => label(a).localeCompare(label(b), "en", { sensitivity: "base" }),
+  };
+  const pool = sort === "backlog" ? games.filter((g) => g.playtime_forever < BACKLOG_MAX_MINUTES) : [...games];
+  return pool.sort((a, b) => compare[sort](a, b) || a.appid - b.appid).slice(0, limit);
 }
 
 export function shapeOwnedGames(raw: any, sort: OwnedGamesSort, limit: number) {

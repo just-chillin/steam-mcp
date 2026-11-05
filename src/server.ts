@@ -106,7 +106,7 @@ export function buildServer(env: Env): McpServer {
     "get_owned_games",
     {
       description:
-        "A player's game library with playtime. Trimmed: returns totals plus up to `limit` games ordered by `sort`. Requires public game details.",
+        "A player's game library with playtime. Trimmed: returns totals plus up to `limit` games ordered by `sort` — playtime: most played; recent: last played first; backlog: only games under 1 hour, never-launched first; name: A–Z. Requires public game details.",
       inputSchema: z.object({
         player,
         sort: z.enum(["playtime", "recent", "backlog", "name"]).default("playtime"),

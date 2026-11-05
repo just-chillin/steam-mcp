@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveSteamId } from "../src/ids";
-import { shapeAchievements, shapeAppDetails, shapeOwnedGames, stripHtml } from "../src/shape";
+import { rankOwnedGames, shapeAchievements, shapeAppDetails, shapeOwnedGames, stripHtml } from "../src/shape";
 import { SteamError, steamGet } from "../src/steam";
 
 const KEY = "TESTKEY";
@@ -100,5 +100,34 @@ describe("shape", () => {
 
   it("strips html and bbcode", () => {
     expect(stripHtml("<p>Hi</p> [b]there[/b] [url=http://x]link[/url]")).toBe("Hi there link");
+  });
+});
+
+describe("rankOwnedGames", () => {
+  const games = [
+    { appid: 10, name: "beta", playtime_forever: 0, rtime_last_played: 0 },
+    { appid: 20, name: "Alpha", playtime_forever: 500, rtime_last_played: 100 },
+    { appid: 30, name: "gamma", playtime_forever: 30, rtime_last_played: 300 },
+    { appid: 40, playtime_forever: 0, rtime_last_played: 0 },
+    { appid: 50, name: "delta", playtime_forever: 59, rtime_last_played: 200 },
+  ];
+  const ids = (g: { appid: number }[]) => g.map((x) => x.appid);
+
+  it("playtime: most played first, ties by appid", () => {
+    expect(ids(rankOwnedGames(games, "playtime", 10))).toEqual([20, 50, 30, 10, 40]);
+  });
+  it("recent: last played first, never-played last", () => {
+    expect(ids(rankOwnedGames(games, "recent", 10))).toEqual([30, 50, 20, 10, 40]);
+  });
+  it("backlog: under 60 min only, never-launched first, newer appid first", () => {
+    expect(ids(rankOwnedGames(games, "backlog", 10))).toEqual([40, 10, 50, 30]);
+  });
+  it("name: case-insensitive A-Z, missing name falls back to appid", () => {
+    expect(ids(rankOwnedGames(games, "name", 10))).toEqual([40, 20, 10, 50, 30]);
+  });
+  it("respects limit and does not mutate input", () => {
+    const before = ids(games);
+    expect(rankOwnedGames(games, "playtime", 2)).toHaveLength(2);
+    expect(ids(games)).toEqual(before);
   });
 });
